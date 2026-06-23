@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title th:text="${room.name}">トーク</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --line-green: #00b900;
+            --line-green-dark: #009900;
+            --line-bg: #f0f0f0;
+        }
+        body {
+            font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, "Noto Sans JP", Arial, sans-serif;
+            background: var(--line-bg);
+            -webkit-font-smoothing: antialiased;
+        }
+        #message-input {
+            resize: none;
+            max-height: 7rem;
+            overflow-y: auto;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body class="min-h-full flex flex-col">
+
+<!-- AppShell -->
+<div class="flex justify-center min-h-screen" style="background-color: var(--line-bg)">
+    <div class="relative flex flex-col w-full overflow-hidden bg-white" style="max-width: 430px; height: 100dvh;">
+
+        <!-- AppHeader -->
+        <header class="flex items-center gap-2 px-4 text-white flex-shrink-0"
+                style="background-color: var(--line-green); height: 56px">
+            <!-- 左ゾーン: 戻るボタン -->
+            <div class="flex items-center gap-2 flex-shrink-0 w-10">
+                <button onclick="history.back()" aria-label="戻る"
+                        class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/20 active:bg-white/30 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- 中央ゾーン: アバター + ルーム名 -->
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 min-w-0">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
+                         style="background-color: var(--line-green-dark)"
+                         th:text="${room.avatar}">田</div>
+                    <span class="font-bold text-sm truncate" th:text="${room.name}">田中 太郎</span>
+                </div>
+            </div>
+
+            <!-- 右ゾーン: 音声通話・メニュー -->
+            <div class="flex items-center gap-1 flex-shrink-0">
+                <button aria-label="音声通話"
+                        class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/20 active:bg-white/30 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"/>
+                    </svg>
+                </button>
+                <button aria-label="メニュー"
+                        class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/20 active:bg-white/30 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- メッセージエリア -->
+        <main id="message-area"
+              class="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1"
+              style="background-color: #d4edda">
+
+            <th:block th:each="msg : ${messages}">
+                <!-- 日付ラベル -->
+                <div th:if="${msg.showDateLabel}" class="flex justify-center my-3">
+                    <span class="text-xs text-gray-600 bg-white/60 rounded-full px-3 py-1"
+                          th:text="${msg.dateLabel}">今日</span>
+                </div>
+
+                <!-- メッセージバブル -->
+                <div class="flex items-end gap-2 mb-0.5"
+                     th:classappend="${msg.isMine} ? 'flex-row-reverse' : 'flex-row'">
+
+                    <!-- 相手のアバター (自分でない場合のみ) -->
+                    <div th:if="${!msg.isMine}" class="w-8 flex-shrink-0 self-end">
+                        <div th:if="${msg.last}"
+                             class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                             style="background-color: var(--line-green)"
+                             th:text="${room.avatar}">田</div>
+                    </div>
+
+                    <div class="flex flex-col max-w-[72%]"
+                         th:classappend="${msg.isMine} ? 'items-end' : 'items-start'">
+                        <!-- 送信者名 (相手の最初のメッセージのみ) -->
+                        <span th:if="${!msg.isMine and msg.first}"
+                              class="text-xs text-gray-600 mb-1 ml-1"
+                              th:text="${msg.senderName}">田中 太郎</span>
+
+                        <div class="flex items-end gap-1"
+                             th:classappend="${msg.isMine} ? 'flex-row-reverse' : 'flex-row'">
+                            <!-- バブル本体 -->
+                            <div th:if="${msg.isMine}"
+                                 class="px-3 py-2 rounded-2xl rounded-br-sm text-sm leading-relaxed break-words text-white"
+                                 style="background-color: var(--line-green)"
+                                 th:text="${msg.content}">メッセージ</div>
+                            <div th:if="${!msg.isMine}"
+                                 class="px-3 py-2 rounded-2xl rounded-bl-sm text-sm leading-relaxed break-words bg-white text-gray-900 shadow-sm"
+                                 th:text="${msg.content}">メッセージ</div>
+
+                            <!-- 時刻 (最後のメッセージのみ) -->
+                            <span th:if="${msg.last}"
+                                  class="text-xs text-gray-500 flex-shrink-0 mb-0.5"
+                                  th:text="${msg.formattedTime}">12:00</span>
+                        </div>
+                    </div>
+                </div>
+            </th:block>
+
+            <!-- 新しいメッセージ追加先 -->
+            <div id="message-bottom"></div>
+        </main>
+
+        <!-- 入力エリア -->
+        <footer class="flex items-end gap-2 px-3 py-2 bg-white border-t border-gray-200 flex-shrink-0">
+            <button aria-label="スタンプ"
+                    class="w-9 h-9 flex items-center justify-center text-gray-400 flex-shrink-0 hover:text-gray-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z"/>
+                </svg>
+            </button>
+
+            <textarea id="message-input"
+                      placeholder="メッセージを入力"
+                      rows="1"
+                      class="flex-1 rounded-2xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-green-400 bg-gray-50"></textarea>
+
+            <button aria-label="カメラ"
+                    class="w-9 h-9 flex items-center justify-center text-gray-400 flex-shrink-0 hover:text-gray-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"/>
+                </svg>
+            </button>
+
+            <button id="send-btn"
+                    aria-label="送信"
+                    class="w-9 h-9 flex items-center justify-center rounded-full transition-all flex-shrink-0 disabled:opacity-40"
+                    style="background-color: #ccc">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-white">
+                    <path d="M3.478 2.405a.75.75 0 0 0-.926.94l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.405Z"/>
+                </svg>
+            </button>
+        </footer>
+
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const ROOM_ID = /*[[${room.id}]]*/ 0;
+    const ROOM_AVATAR = /*[[${room.avatar}]]*/ '';
+    const LINE_GREEN = '#00b900';
+
+    const messageArea = document.getElementById('message-area');
+    const messageBottom = document.getElementById('message-bottom');
+    const messageInput = document.getElementById('message-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    // 初期表示時に最下部にスクロール
+    messageBottom.scrollIntoView({ behavior: 'instant' });
+
+    // 入力状態に応じて送信ボタンの色を変える
+    messageInput.addEventListener('input', () => {
+        const hasContent = messageInput.value.trim().length > 0;
+        sendBtn.style.backgroundColor = hasContent ? LINE_GREEN : '#ccc';
+        sendBtn.disabled = !hasContent;
+        // テキストエリアの高さを自動調整
+        messageInput.style.height = 'auto';
+        messageInput.style.height = Math.min(messageInput.scrollHeight, 112) + 'px';
+    });
+
+    // Enterキーで送信 (Shift+Enterは改行)
+    messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    sendBtn.addEventListener('click', sendMessage);
+
+    let sending = false;
+
+    async function sendMessage() {
+        const content = messageInput.value.trim();
+        if (!content || sending) return;
+        sending = true;
+
+        const tempId = Date.now();
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+
+        // 楽観的更新: 即座にメッセージを表示
+        appendMyMessage(tempId, content, timeStr);
+        messageInput.value = '';
+        messageInput.style.height = 'auto';
+        sendBtn.style.backgroundColor = '#ccc';
+        sendBtn.disabled = true;
+
+        try {
+            const res = await fetch('/api/rooms/' + ROOM_ID + '/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content })
+            });
+
+            if (res.ok) {
+                const saved = await res.json();
+                // 楽観的メッセージを確定済みIDに更新
+                const el = document.getElementById('msg-' + tempId);
+                if (el) el.id = 'msg-' + saved.id;
+            }
+        } catch (e) {
+            // 楽観的更新済みのため何もしない
+        } finally {
+            sending = false;
+            messageInput.focus();
+        }
+    }
+
+    function appendMyMessage(id, content, timeStr) {
+        const div = document.createElement('div');
+        div.id = 'msg-' + id;
+        div.className = 'flex items-end gap-2 mb-0.5 flex-row-reverse';
+        div.innerHTML = `
+            <div class="flex flex-col max-w-[72%] items-end">
+                <div class="flex items-end gap-1 flex-row-reverse">
+                    <div class="px-3 py-2 rounded-2xl rounded-br-sm text-sm leading-relaxed break-words text-white"
+                         style="background-color: ${LINE_GREEN}">${escapeHtml(content)}</div>
+                    <span class="text-xs text-gray-500 flex-shrink-0 mb-0.5">${timeStr}</span>
+                </div>
+            </div>
+        `;
+        messageArea.insertBefore(div, messageBottom);
+        messageBottom.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                  .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+</script>
+
+</body>
+</html>

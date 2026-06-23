@@ -1,0 +1,10 @@
+target/
+*.class
+*.jar
+*.war
+.mvn/
+*.iml
+.idea/
+.vscode/
+*.log
+application-local.properties

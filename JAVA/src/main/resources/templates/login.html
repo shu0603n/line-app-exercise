@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LINE App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --line-green: #00b900;
+            --line-green-dark: #009900;
+            --line-bg: #f0f0f0;
+        }
+        body {
+            font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, "Noto Sans JP", Arial, sans-serif;
+            background: var(--line-bg);
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+</head>
+<body class="min-h-full flex flex-col">
+
+<!-- AppShell -->
+<div class="flex justify-center min-h-screen" style="background-color: var(--line-bg)">
+    <div class="relative flex flex-col w-full overflow-hidden bg-white" style="max-width: 430px; height: 100dvh;">
+
+        <!-- ロゴエリア (緑背景) -->
+        <div class="flex flex-col items-center justify-center flex-1 gap-6 px-8" style="background-color: var(--line-green)">
+            <div class="w-24 h-24 bg-white rounded-3xl flex items-center justify-center shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" class="w-16 h-16" style="fill: var(--line-green)">
+                    <path d="M24 4C12.95 4 4 11.87 4 21.5c0 5.67 3.1 10.7 7.93 13.94-.35 1.27-1.27 4.6-1.46 5.32-.23.9.33 1.89 1.24 1.89.22 0 .44-.06.64-.19l6.63-4.4c1.63.35 3.32.54 5.02.54 11.05 0 20-7.87 20-17.5C44 11.87 35.05 4 24 4z"/>
+                    <path d="M16 23h-2v-6h2v6zm8 0h-2l-3-4v4h-2v-6h2l3 4v-4h2v6zm6 0h-5v-6h2v4h3v2zm4-4h-2v4h-2v-4h-2v-2h6v2z" fill="white"/>
+                </svg>
+            </div>
+
+            <div class="text-center text-white">
+                <h1 class="text-3xl font-bold tracking-wide"
+                    th:text="${systemInfo != null ? systemInfo.systemName : 'LINE App'}">LINE App</h1>
+                <p class="text-sm opacity-75 mt-1"
+                   th:if="${systemInfo != null and systemInfo.version != null}"
+                   th:text="'v' + ${systemInfo.version}">v1.0.0</p>
+                <p class="text-xs opacity-60 mt-1"
+                   th:if="${systemInfo != null and systemInfo.description != null}"
+                   th:text="${systemInfo.description}">LINEを模したメッセージングシステム</p>
+            </div>
+        </div>
+
+        <!-- フォームエリア -->
+        <div class="flex flex-col gap-4 px-6 py-8 bg-white flex-shrink-0">
+            <div class="flex flex-col gap-3">
+                <div class="flex flex-col gap-1">
+                    <label class="text-sm font-medium text-gray-600">メールアドレス / 電話番号</label>
+                    <input type="text"
+                           placeholder="example@email.com"
+                           class="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none bg-gray-50" />
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label class="text-sm font-medium text-gray-600">パスワード</label>
+                    <input type="password"
+                           placeholder="••••••••"
+                           class="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none bg-gray-50" />
+                </div>
+            </div>
+
+            <button onclick="window.location.href='/talk'"
+                    class="w-full py-3 rounded-full text-white text-sm font-bold tracking-wide transition-opacity active:opacity-80"
+                    style="background-color: var(--line-green)">
+                ログイン
+            </button>
+
+            <div class="flex items-center gap-3">
+                <div class="flex-1 h-px bg-gray-200"></div>
+                <span class="text-xs text-gray-400">または</span>
+                <div class="flex-1 h-px bg-gray-200"></div>
+            </div>
+
+            <button class="w-full py-3 rounded-full border border-gray-300 text-gray-600 text-sm font-medium transition-colors hover:bg-gray-50 active:bg-gray-100">
+                QRコードでログイン
+            </button>
+
+            <p class="text-center text-xs text-gray-400">
+                アカウントをお持ちでない方は
+                <span class="font-medium cursor-pointer" style="color: var(--line-green)">新規登録</span>
+            </p>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

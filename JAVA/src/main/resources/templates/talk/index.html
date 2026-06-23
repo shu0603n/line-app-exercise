@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title th:text="${systemInfo != null ? systemInfo.systemName : 'LINE App'}">LINE App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --line-green: #00b900;
+            --line-green-dark: #009900;
+            --line-bg: #f0f0f0;
+        }
+        body {
+            font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, "Noto Sans JP", Arial, sans-serif;
+            background: var(--line-bg);
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+</head>
+<body class="min-h-full flex flex-col">
+
+<!-- AppShell -->
+<div class="flex justify-center min-h-screen" style="background-color: var(--line-bg)">
+    <div class="relative flex flex-col w-full overflow-hidden bg-white" style="max-width: 430px; height: 100dvh;">
+
+        <!-- AppHeader -->
+        <header class="flex items-center gap-2 px-4 text-white flex-shrink-0"
+                style="background-color: var(--line-green); height: 56px">
+            <!-- 左ゾーン (空) -->
+            <div class="flex items-center gap-2 flex-shrink-0 w-10"></div>
+
+            <!-- 中央ゾーン: タイトル -->
+            <div class="flex-1 min-w-0">
+                <p class="font-bold text-base leading-tight truncate"
+                   th:text="${systemInfo != null ? systemInfo.systemName : 'LINE App'}">LINE App</p>
+                <p class="text-xs opacity-70 leading-tight"
+                   th:if="${systemInfo != null}"
+                   th:text="'v' + ${systemInfo.version}">v1.0.0</p>
+            </div>
+
+            <!-- 右ゾーン: 検索・追加アイコン -->
+            <div class="flex items-center gap-1 flex-shrink-0">
+                <button aria-label="検索"
+                        class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/20 active:bg-white/30 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+                    </svg>
+                </button>
+                <button aria-label="新規追加"
+                        class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/20 active:bg-white/30 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- チャットリスト -->
+        <main class="flex-1 overflow-y-auto bg-white">
+            <ul class="divide-y divide-gray-100">
+                <li th:each="room : ${rooms}"
+                    th:onclick="|window.location.href='/talk/${room.id}'|"
+                    class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer active:bg-gray-100 transition-colors">
+                    <!-- アバター -->
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-bold flex-shrink-0"
+                         style="background-color: var(--line-green)"
+                         th:text="${room.avatar}">田</div>
+                    <!-- テキスト -->
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-0.5">
+                            <span class="font-semibold text-sm text-gray-900 truncate" th:text="${room.name}">田中 太郎</span>
+                            <span class="text-xs text-gray-400 flex-shrink-0 ml-2"
+                                  th:if="${room.formattedTime != null and !room.formattedTime.isEmpty()}"
+                                  th:text="${room.formattedTime}">12:00</span>
+                        </div>
+                        <span class="text-xs text-gray-500 truncate block" th:text="${room.lastMessageContent}">最新メッセージ</span>
+                    </div>
+                </li>
+            </ul>
+        </main>
+
+        <!-- ボトムナビゲーション -->
+        <nav class="flex border-t border-gray-200 bg-white flex-shrink-0" style="height: 56px">
+            <!-- トーク (アクティブ) -->
+            <button class="flex-1 flex flex-col items-center justify-center gap-0.5" style="color: var(--line-green)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z"/>
+                </svg>
+                <span class="text-xs">トーク</span>
+            </button>
+            <!-- 友だち -->
+            <button class="flex-1 flex flex-col items-center justify-center gap-0.5" style="color: #999">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/>
+                </svg>
+                <span class="text-xs">友だち</span>
+            </button>
+            <!-- ニュース -->
+            <button class="flex-1 flex flex-col items-center justify-center gap-0.5" style="color: #999">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z"/>
+                </svg>
+                <span class="text-xs">ニュース</span>
+            </button>
+            <!-- その他 -->
+            <button class="flex-1 flex flex-col items-center justify-center gap-0.5" style="color: #999">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+                </svg>
+                <span class="text-xs">その他</span>
+            </button>
+        </nav>
+
+    </div>
+</div>
+
+</body>
+</html>
