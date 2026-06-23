@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model SystemInfo {
+  id          Int      @id @default(autoincrement())
+  systemName  String   @map("system_name")
+  version     String
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("system_info")
+}
+
+model ChatRoom {
+  id        Int       @id @default(autoincrement())
+  name      String
+  avatar    String
+  createdAt DateTime  @default(now()) @map("created_at")
+  messages  Message[]
+
+  @@map("chat_rooms")
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  roomId     Int      @map("room_id")
+  senderName String   @map("sender_name")
+  content    String
+  isMine     Boolean  @default(false) @map("is_mine")
+  sentAt     DateTime @default(now()) @map("sent_at")
+  room       ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
