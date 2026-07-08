@@ -21,6 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+//start add 2026.07.07 takenami
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import com.example.lineapp.entity.User;
+import com.example.lineapp.repository.UserRepository;
+//end add 2026.07.07 takenami
+
 @Controller
 public class WebController {
 
@@ -28,12 +35,23 @@ public class WebController {
     private final ChatRoomRepository chatRoomRepository;
     private final MessageRepository messageRepository;
 
+    //start add 2026.07.07 takenami
+    private final UserRepository userRepository;
+    //end add 2026.07.07 takenami
+
     public WebController(SystemInfoRepository systemInfoRepository,
                          ChatRoomRepository chatRoomRepository,
-                         MessageRepository messageRepository) {
+                         MessageRepository messageRepository
+    //start add 2026.07.07 takenami
+                         ,UserRepository userRepository
+    //end add 2026.07.07 takenami
+                         ) {
         this.systemInfoRepository = systemInfoRepository;
         this.chatRoomRepository = chatRoomRepository;
         this.messageRepository = messageRepository;
+    //start add 2026.07.07 takenami
+        this.userRepository = userRepository;
+    //end add 2026.07.07 takenami
     }
 
     @GetMapping("/")
@@ -42,6 +60,27 @@ public class WebController {
                 .ifPresent(si -> model.addAttribute("systemInfo", si));
         return "login";
     }
+
+    //start add 2026.07.07 takenami
+    @PostMapping("/login")
+    public String doLogin(@RequestParam String loginId,
+                      @RequestParam String password,
+                      Model model) {
+                      Optional<User> user = userRepository.findByLoginId(loginId);
+
+        if (user.isPresent()
+            && user.get().getPassword().equals(password)) {
+        return "redirect:/talk";
+    }
+
+    model.addAttribute("error", "メールアドレス/電話番号またはパスワードが違います");
+
+    systemInfoRepository.findFirstByIsActiveTrueOrderByCreatedAtDesc()
+            .ifPresent(si -> model.addAttribute("systemInfo", si));
+
+    return "login";
+    }
+    // end add 2026.07.07 takenami
 
     @GetMapping("/talk")
     public String talk(Model model) {

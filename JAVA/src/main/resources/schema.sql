@@ -27,3 +27,13 @@ CREATE TABLE IF NOT EXISTS messages (
     is_mine     BOOLEAN      NOT NULL DEFAULT FALSE,
     sent_at     TIMESTAMP    NOT NULL DEFAULT NOW()
 );
+
+-- start add 2026.07.07 takenami
+CREATE TABLE IF NOT EXISTS line_users (
+    id          SERIAL PRIMARY KEY,
+    login_id    VARCHAR(255) NOT NULL UNIQUE,
+    password    VARCHAR(255) NOT NULL,
+    name        VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+-- end add 2026.07.07 takenami

@@ -94,3 +94,8 @@ FROM chat_rooms r,
 ) AS v(sn, ct, im, off)
 WHERE r.name = 'プロジェクトA'
 AND NOT EXISTS (SELECT 1 FROM messages WHERE room_id = r.id);
+
+-- start add 2026.07.07 takenami
+INSERT INTO line_users (login_id, password, name)
+VALUES ('1', '1', 'test');
+-- end add 2026.07.07 takenami
