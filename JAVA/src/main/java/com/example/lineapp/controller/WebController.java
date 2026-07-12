@@ -28,6 +28,11 @@ import com.example.lineapp.entity.User;
 import com.example.lineapp.repository.UserRepository;
 //end add 2026.07.07 takenami
 
+//start add 2026.07.12 takenami
+import org.springframework.security.crypto.password.PasswordEncoder;
+import jakarta.servlet.http.HttpSession; //ログインを維持
+//end add 2026.07.12 takenami
+
 @Controller
 public class WebController {
 
@@ -39,12 +44,20 @@ public class WebController {
     private final UserRepository userRepository;
     //end add 2026.07.07 takenami
 
+    // start add 2026.07.12 takenami
+    private final PasswordEncoder passwordEncoder;
+    // end add 2026.07.12 takenami
+
     public WebController(SystemInfoRepository systemInfoRepository,
                          ChatRoomRepository chatRoomRepository,
                          MessageRepository messageRepository
     //start add 2026.07.07 takenami
                          ,UserRepository userRepository
     //end add 2026.07.07 takenami
+
+    //start add 2026.07.12 takenami
+                         ,PasswordEncoder passwordEncoder
+    //end add 2026.07.12 takenami
                          ) {
         this.systemInfoRepository = systemInfoRepository;
         this.chatRoomRepository = chatRoomRepository;
@@ -52,6 +65,11 @@ public class WebController {
     //start add 2026.07.07 takenami
         this.userRepository = userRepository;
     //end add 2026.07.07 takenami
+
+    // start add 2026.07.12 takenami
+        this.passwordEncoder = passwordEncoder;
+    // end add 2026.07.12 takenami
+
     }
 
     @GetMapping("/")
@@ -65,13 +83,33 @@ public class WebController {
     @PostMapping("/login")
     public String doLogin(@RequestParam String loginId,
                       @RequestParam String password,
-                      Model model) {
+                      Model model
+                      //start add 2026.07.12 takenami
+                      ,HttpSession session
+                      //end add 2026.07.12 takenami
+                      ) {
                       Optional<User> user = userRepository.findByLoginId(loginId);
 
+//delete 2026.07.12 takenami ログイン判定修正のため
+        //if (user.isPresent()
+            //&& user.get().getPassword().equals(password)) {
+        //return "redirect:/talk";
+
+//start add 2026.07.12 takenami
         if (user.isPresent()
-            && user.get().getPassword().equals(password)) {
-        return "redirect:/talk";
-    }
+            && passwordEncoder.matches(
+                password,
+                user.get().getPassword()
+        )) {
+
+    User loginUser = user.get();
+
+    session.setAttribute("loginUserId", loginUser.getId());
+    session.setAttribute("loginUserName", loginUser.getName());
+
+    return "redirect:/talk";
+}
+//end add 2026.07.12 takenami
 
     model.addAttribute("error", "メールアドレス/電話番号またはパスワードが違います");
 
@@ -83,7 +121,18 @@ public class WebController {
     // end add 2026.07.07 takenami
 
     @GetMapping("/talk")
-    public String talk(Model model) {
+    public String talk(Model model
+    //start add 2026.07.12 takenami
+    ,HttpSession session
+    //end add 2026.07.12 takenami
+    ) {
+
+    // start add 2026.07.12 takenami 
+    if (session.getAttribute("loginUserId") == null) {
+        return "redirect:/";
+    }
+    // end add 2026.07.12 takenami
+
         systemInfoRepository.findFirstByIsActiveTrueOrderByCreatedAtDesc()
                 .ifPresent(si -> model.addAttribute("systemInfo", si));
 
@@ -100,7 +149,19 @@ public class WebController {
     }
 
     @GetMapping("/talk/{id}")
-    public String talkRoom(@PathVariable Integer id, Model model) {
+    public String talkRoom(@PathVariable Integer id, Model model
+
+    //start add 2026.07.12 takenami
+     ,HttpSession session
+    //end add 2026.07.12 takenami
+
+     ) {
+    // start add 2026.07.12 takenami 
+        if (session.getAttribute("loginUserId") == null) {
+            return "redirect:/";
+    }
+    // end add 2026.07.12 takenami
+
         Optional<ChatRoom> roomOpt = chatRoomRepository.findById(id);
         if (roomOpt.isEmpty()) {
             return "redirect:/talk";

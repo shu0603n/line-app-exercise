@@ -96,6 +96,24 @@ WHERE r.name = 'プロジェクトA'
 AND NOT EXISTS (SELECT 1 FROM messages WHERE room_id = r.id);
 
 -- start add 2026.07.07 takenami
-INSERT INTO line_users (login_id, password, name)
-VALUES ('1', '1', 'test');
+-- delete 2026.07.12 takenami
+--INSERT INTO line_users (login_id, password, name)
+--VALUES ('1', '1', 'test');
 -- end add 2026.07.07 takenami
+
+-- start add 2026.07.12 takenami
+INSERT INTO line_users (login_id, password, name)
+SELECT
+    '1',
+    '$2a$10$LwUPMS5KqeTOZC.xCU9LWOkQgb30tR4KRYp8KkyHbm0qXyrmEb1hq',
+    'test'
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM line_users
+    WHERE login_id = '1'
+);
+
+UPDATE line_users
+SET password = '$2a$10$LwUPMS5KqeTOZC.xCU9LWOkQgb30tR4KRYp8KkyHbm0qXyrmEb1hq'
+WHERE login_id = '1';
+-- end add 2026.07.12 takenami
