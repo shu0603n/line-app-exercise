@@ -111,7 +111,7 @@ public class WebController {
 }
 //end add 2026.07.12 takenami
 
-    model.addAttribute("error", "メールアドレス/電話番号またはパスワードが違います");
+    model.addAttribute("error", "ログインIDまたはパスワードが違います");
 
     systemInfoRepository.findFirstByIsActiveTrueOrderByCreatedAtDesc()
             .ifPresent(si -> model.addAttribute("systemInfo", si));
